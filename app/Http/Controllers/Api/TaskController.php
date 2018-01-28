@@ -8,6 +8,8 @@ use DB;
 use App\Task;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Repositories\TaskRepository;
+
 
 class TaskController extends Controller
 {
@@ -16,10 +18,20 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    private $taskRepository;
+
+
+    public function __construct(TaskRepository $taskRepository){
+        $this->taskRepository = $taskRepository;
+    }
+
+
+
     public function index()
     {
-        //
-        $tasks = Task::all();
+
+        $tasks = $this->taskRepository->getAll();
         return response($tasks, 200);
       
     }
@@ -45,10 +57,17 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         //
-        $task = new Task();
-        $task->body = $request->input('body');
-        $task->save();
+        //$task = new Task();
+        //$task->body = $request->input('body');
+        //$task->save();
+        //return response()->json(['message' => 'Task Added']);
+
+
+
+        $attributes = $request->only(['body']);
+        $this->taskRepository->create($attributes);
         return response()->json(['message' => 'Task Added']);
+
 
     }
 
@@ -61,8 +80,13 @@ class TaskController extends Controller
     public function show($id)
     {
         //
-        $task = Task::find($id);
-        return response( $task , 200 );
+        //$task = Task::find($id);
+        //return response( $task , 200 );
+        
+        $task = $this->taskRepository->getById($id);
+        return response($task,200);
+
+
     }
 
     /**
@@ -86,10 +110,16 @@ class TaskController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $task = Task::find($id);
-        $task->body = $request->input('body');
-        $task->save();
+        //$task = Task::find($id);
+        //$task->body = $request->input('body');
+        //$task->save();
+        //return response()->json(['message' => 'Task Updated']);
+
+        $attributes = $request->only(['body']);
+        $this->taskRepository->update($id,$attributes);
         return response()->json(['message' => 'Task Updated']);
+
+
     }
 
     /**
@@ -101,8 +131,11 @@ class TaskController extends Controller
     public function destroy($id)
     {
         //
-        $task = Task::find($id);
-        $task->delete();
+        //$task = Task::find($id);
+        //$task->delete();
+        //return response()->json(['message' => 'Task Deleted']);
+
+        $this->taskRepository->delete($id);
         return response()->json(['message' => 'Task Deleted']);
     }
 }
